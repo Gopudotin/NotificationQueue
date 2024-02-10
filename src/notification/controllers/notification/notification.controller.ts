@@ -1,9 +1,17 @@
 // notification/controllers/notification/notification.controller.ts
 
-import { Controller, Get, Post, Body, Param, Put, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Put,
+  Delete,
+} from '@nestjs/common';
 import { Notification } from 'src/notification/notification.entity';
 import { NotificationService } from '../../services/notification/notification.service';
-import { SubNotificationService } from '../../../sub-notification/services/sub-notification/sub-notification.service'; 
+import { SubNotificationService } from '../../../sub-notification/services/sub-notification/sub-notification.service';
 
 // Define interface for payload object
 interface Payload {
@@ -14,20 +22,40 @@ interface Payload {
 export class NotificationController {
   constructor(
     private readonly notificationService: NotificationService,
-    private readonly subNotificationService: SubNotificationService 
+    private readonly subNotificationService: SubNotificationService,
   ) {}
 
   @Post()
-  async create(@Body() notificationData: { scheduled_at: Date, title: string, description: string, payload: Payload, subscriberIds: number[] }): Promise<Notification> {
-    const { scheduled_at, subscriberIds, ...restData } = notificationData;
+  async create(
+    @Body()
+    notificationData: {
+      scheduled_at: Date;
+      title: string;
+      description: string;
+      payload?: Payload;
+      subscriberIds: number[];
+    },
+  ): Promise<Notification> {
+    const { scheduled_at, subscriberIds, payload, ...restData } =
+      notificationData;
 
-    // Combine description with payload value
-    const notificationMessage = `${notificationData.description} ${notificationData.payload.name}`;
+    // Combine description with payload value if payload exists
+    let notificationMessage = notificationData.description;
+    if (payload && payload.name) {
+      notificationMessage += ` ${payload.name}`;
+    }
 
-    const createdNotification = await this.notificationService.create({ ...restData, description: notificationMessage });
+    const createdNotification = await this.notificationService.create({
+      ...restData,
+      description: notificationMessage,
+    });
 
     if (scheduled_at) {
-      await this.subNotificationService.scheduleNotification(createdNotification.id, scheduled_at, subscriberIds);
+      await this.subNotificationService.scheduleNotification(
+        createdNotification.id,
+        scheduled_at,
+        subscriberIds,
+      );
     }
 
     return createdNotification;
@@ -44,7 +72,10 @@ export class NotificationController {
   }
 
   @Put(':id')
-  updateNotification(@Param('id') id: number, @Body() updatedData: Partial<Notification>): Promise<[number, Notification[]]> {
+  updateNotification(
+    @Param('id') id: number,
+    @Body() updatedData: Partial<Notification>,
+  ): Promise<[number, Notification[]]> {
     return this.notificationService.update(id, updatedData);
   }
 
