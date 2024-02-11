@@ -1,5 +1,4 @@
 // notification/controllers/notification/notification.controller.ts
-
 import {
   Controller,
   Get,
@@ -13,11 +12,6 @@ import { Notification } from 'src/notification/notification.entity';
 import { NotificationService } from '../../services/notification/notification.service';
 import { SubNotificationService } from '../../../sub-notification/services/sub-notification/sub-notification.service';
 
-// Define interface for payload object
-interface Payload {
-  name: string;
-}
-
 @Controller('notification')
 export class NotificationController {
   constructor(
@@ -29,15 +23,21 @@ export class NotificationController {
   async create(
     @Body()
     notificationData: {
-      scheduled_at: Date;
+      schedule_date: string; // Change this to string
+      scheduled_time: string;
       title: string;
       description: string;
-      payload?: Payload;
+      payload?: { name: string };
       subscriberIds: number[];
     },
   ): Promise<Notification> {
-    const { scheduled_at, subscriberIds, payload, ...restData } =
-      notificationData;
+    const {
+      schedule_date,
+      scheduled_time,
+      subscriberIds,
+      payload,
+      ...restData
+    } = notificationData;
 
     // Combine description with payload value if payload exists
     let notificationMessage = notificationData.description;
@@ -45,17 +45,21 @@ export class NotificationController {
       notificationMessage += ` ${payload.name}`;
     }
 
+    // Create the notification
     const createdNotification = await this.notificationService.create({
       ...restData,
       description: notificationMessage,
+      schedule_date: new Date(schedule_date), // Convert to Date object
+      scheduled_time: scheduled_time,
     });
 
-    if (scheduled_at) {
-      await this.subNotificationService.scheduleNotification(
-        createdNotification.id,
-        scheduled_at,
-        subscriberIds,
-      );
+    // Create entries in the subscriberNotification table
+    for (const subscriberId of subscriberIds) {
+      await this.subNotificationService.create({
+        notificationId: createdNotification.id,
+        subscriberId: subscriberId,
+        hasRead: false, // Set hasRead to false by default
+      });
     }
 
     return createdNotification;

@@ -23,8 +23,14 @@ export class NotificationService {
     return this.notificationModel.create(notificationData);
   }
 
-  async update(id: number, notificationData: Partial<Notification>): Promise<[number, Notification[]]> {
-    return this.notificationModel.update(notificationData, { where: { id }, returning: true });
+  async update(
+    id: number,
+    notificationData: Partial<Notification>,
+  ): Promise<[number, Notification[]]> {
+    return this.notificationModel.update(notificationData, {
+      where: { id },
+      returning: true,
+    });
   }
 
   async remove(id: number): Promise<void> {

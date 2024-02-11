@@ -29,10 +29,16 @@ export class Notification extends Model {
   @Column({
     type: DataType.DATE,
     allowNull: false,
-    defaultValue: DataType.NOW,
-    field: 'scheduled_at',
+    field: 'schedule_date',
   })
-  scheduled_at: Date;
+  schedule_date: Date;
+
+  @Column({
+    type: DataType.TIME,
+    allowNull: false,
+    field: 'scheduled_time',
+  })
+  scheduled_time: string;
 
   @Column({
     type: DataType.DATE,

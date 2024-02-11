@@ -10,7 +10,7 @@ export class SubNotificationController {
   constructor(
     @InjectModel(SubscriberNotification)
     private readonly subscriberNotificationModel: typeof SubscriberNotification,
-    private readonly subNotificationService: SubNotificationService, 
+    private readonly subNotificationService: SubNotificationService,
   ) {}
 
   @Get()
@@ -20,11 +20,17 @@ export class SubNotificationController {
 
   // New endpoint to update has_read status
   @Put(':subscriberId/:notificationId/read')
-  async markNotificationAsRead(@Param('subscriberId') subscriberId: string, @Param('notificationId') notificationId: string) {
+  async markNotificationAsRead(
+    @Param('subscriberId') subscriberId: string,
+    @Param('notificationId') notificationId: string,
+  ) {
     const parsedSubscriberId = parseInt(subscriberId, 10);
     const parsedNotificationId = parseInt(notificationId, 10);
 
-    await this.subNotificationService.processNotification(parsedSubscriberId, parsedNotificationId);
+    await this.subNotificationService.processNotification(
+      parsedSubscriberId,
+      parsedNotificationId,
+    );
     return { message: 'Notification marked as read.' };
   }
 }

@@ -5,19 +5,22 @@ import { NotificationService } from 'src/notification/services/notification/noti
 
 @Processor('notificationQueue')
 export class NotificationProcessor {
-  constructor(
-    // private readonly subNotificationService: SubNotificationService,
-    // private readonly notificationService: NotificationService,
-  ) {}
+  constructor() // private readonly notificationService: NotificationService, // private readonly subNotificationService: SubNotificationService,
+  {}
 
   @Process()
-  async processNotificationJob(job: Job<{ subscriberId: number; notificationId: number }>): Promise<void> {
+  async processNotificationJob(
+    job: Job<{ subscriberId: number; notificationId: number }>,
+  ): Promise<void> {
     const { subscriberId, notificationId } = job.data;
 
     try {
       // await this.subNotificationService.processNotification(subscriberId, notificationId);
     } catch (error) {
-      console.error(`Error processing notification job for ID ${notificationId}:`, error.message);
+      console.error(
+        `Error processing notification job for ID ${notificationId}:`,
+        error.message,
+      );
     }
   }
 }
