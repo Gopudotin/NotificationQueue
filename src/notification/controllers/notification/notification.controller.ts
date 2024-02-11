@@ -46,21 +46,15 @@ export class NotificationController {
     }
 
     // Create the notification
-    const createdNotification = await this.notificationService.create({
-      ...restData,
-      description: notificationMessage,
-      schedule_date: new Date(schedule_date), // Convert to Date object
-      scheduled_time: scheduled_time,
-    });
-
-    // Create entries in the subscriberNotification table
-    for (const subscriberId of subscriberIds) {
-      await this.subNotificationService.create({
-        notificationId: createdNotification.id,
-        subscriberId: subscriberId,
-        hasRead: false, // Set hasRead to false by default
-      });
-    }
+    const createdNotification = await this.notificationService.create(
+      {
+        ...restData,
+        description: notificationMessage,
+        schedule_date: new Date(schedule_date), // Convert to Date object
+        scheduled_time: scheduled_time,
+      },
+      subscriberIds, // Pass subscriberIds to the create method
+    );
 
     return createdNotification;
   }

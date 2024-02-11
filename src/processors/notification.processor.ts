@@ -1,21 +1,24 @@
-import { Processor, Process } from '@nestjs/bull';
+import { Processor, Process, OnQueueCompleted } from '@nestjs/bull';
 import { Job } from 'bull';
 import { SubNotificationService } from 'src/sub-notification/services/sub-notification/sub-notification.service';
-import { NotificationService } from 'src/notification/services/notification/notification.service';
 
 @Processor('notificationQueue')
 export class NotificationProcessor {
-  constructor() // private readonly notificationService: NotificationService, // private readonly subNotificationService: SubNotificationService,
-  {}
+  constructor(
+    private readonly subNotificationService: SubNotificationService,
+  ) {}
 
-  @Process()
+  @Process('processNotification')
   async processNotificationJob(
-    job: Job<{ subscriberId: number; notificationId: number }>,
+    job: Job<{ notificationId: number; subscriberIds: number[] }>,
   ): Promise<void> {
-    const { subscriberId, notificationId } = job.data;
+    const { notificationId, subscriberIds } = job.data;
 
     try {
-      // await this.subNotificationService.processNotification(subscriberId, notificationId);
+      await this.subNotificationService.processNotification(
+        notificationId,
+        subscriberIds,
+      );
     } catch (error) {
       console.error(
         `Error processing notification job for ID ${notificationId}:`,
