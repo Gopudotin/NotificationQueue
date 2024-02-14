@@ -1,4 +1,5 @@
-// sub-notification/services/sub-notification/sub-notification.service.ts
+// src/sub-notification/services/sub-notification/sub-notification.service.ts
+
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { SubscriberNotification } from 'src/sub-notification/sub-notification.entity';
@@ -28,5 +29,31 @@ export class SubNotificationService {
       console.error('Error processing notification:', error);
       throw error;
     }
+  }
+
+  async getUnreadNotificationsForSubscriber(
+    subscriberId: number,
+  ): Promise<SubscriberNotification[]> {
+    return this.subscriberNotificationModel.findAll({
+      where: {
+        subscriberId,
+        hasRead: false,
+      },
+    });
+  }
+
+  async markNotificationAsRead(
+    notificationId: number,
+    subscriberId: number,
+  ): Promise<void> {
+    await this.subscriberNotificationModel.update(
+      { hasRead: true },
+      {
+        where: {
+          subscriberId,
+          notificationId,
+        },
+      },
+    );
   }
 }

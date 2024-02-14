@@ -26,7 +26,7 @@ import { ProcessorsService } from './processors/services/processors/processors.s
     BullModule.forRoot({
       redis: {
         host: 'localhost',
-        port:6379,
+        port: 6379,
       },
     }),
 

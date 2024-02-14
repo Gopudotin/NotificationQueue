@@ -1,15 +1,13 @@
-// notification/services/notification/notification.service.ts
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { Notification } from 'src/notification/notification.entity';
-import { SubNotificationService } from '../../../sub-notification/services/sub-notification/sub-notification.service';
+import { NotificationTemplate } from 'src/template/template.entity';
 
 @Injectable()
 export class NotificationService {
   constructor(
     @InjectModel(Notification)
     private readonly notificationModel: typeof Notification,
-    private readonly subNotificationService: SubNotificationService,
   ) {}
 
   async findAll(): Promise<Notification[]> {
@@ -22,14 +20,20 @@ export class NotificationService {
 
   async create(
     notificationData: Partial<Notification>,
-    subscriberIds: number[],
+    template: NotificationTemplate,
+    subscribers: string[],
   ): Promise<Notification> {
-    const notification = await this.notificationModel.create(notificationData);
-    await this.subNotificationService.processNotification(
-      notification.id,
-      subscriberIds,
+    const notificationMessage = this.renderNotificationMessage(
+      template.template,
+      subscribers,
     );
-    return notification;
+
+    const createdNotification = await this.notificationModel.create({
+      ...notificationData,
+      description: notificationMessage,
+    });
+
+    return createdNotification;
   }
 
   async update(
@@ -44,5 +48,16 @@ export class NotificationService {
 
   async remove(id: number): Promise<void> {
     await this.notificationModel.destroy({ where: { id } });
+  }
+
+  private renderNotificationMessage(
+    template: string,
+    subscribers: string[],
+  ): string {
+    let message = template;
+    subscribers.forEach((subscriber) => {
+      message = message.replace('{{name}}', subscriber);
+    });
+    return message;
   }
 }

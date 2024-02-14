@@ -1,4 +1,3 @@
-// notification/notification.entity.ts
 import { Table, Column, Model, DataType } from 'sequelize-typescript';
 
 @Table({ tableName: 'notification' })
@@ -26,20 +25,6 @@ export class Notification extends Model {
     type: DataType.JSONB,
   })
   payload?: object;
-
-  @Column({
-    type: DataType.DATE,
-    allowNull: false,
-    field: 'schedule_date',
-  })
-  schedule_date: Date;
-
-  @Column({
-    type: DataType.TIME,
-    allowNull: false,
-    field: 'scheduled_time',
-  })
-  scheduled_time: string;
 
   @Column({
     type: DataType.DATE,
